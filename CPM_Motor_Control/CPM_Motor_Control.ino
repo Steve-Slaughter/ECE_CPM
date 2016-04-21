@@ -114,30 +114,27 @@ void reverse(){
 
 void setup() {     
   pinMode(startPin,INPUT_PULLUP);                                  // set startPin to Input
-  
   pinMode(eStopPin,INPUT_PULLUP);                                  // set eStopPin to Input
-  attachInterrupt(eStopPin, eStop, HIGH);                          // set EStop Interrupt
-  
   pinMode(slowDown,INPUT_PULLUP);                                  // set slowDown to Input
-  attachInterrupt(slowDown, slower, RISING);                       // set slowDown Interrupt (digitalPinToInterrupt function not working...)
-  
   pinMode(speedUp,INPUT_PULLUP);                                   // set speedUp to Input
-  attachInterrupt(speedUp, faster, RISING);                        // set speedUp Interrupt
-  
   pinMode(saberT,OUTPUT);                                          // Output to Sabertooth
-
   pinMode(changeDir,INPUT);                                        // set changeDir to Input
+  pinMode(chA,INPUT);                                              // set ChA to Input
+  pinMode(chB,INPUT);                                              // set ChB to Input
+
+  analogWrite(saberT,zeroSpeed);                                   //Set to 2.5V (Middle Value, no motor motion) 
+  while (digitalRead(startPin)==0){                                //User must press startPin to begin
+  }
+  
+  attachInterrupt(eStopPin, eStop, HIGH);                          // set EStop Interrupt
+  attachInterrupt(slowDown, slower, RISING);                       // set slowDown Interrupt (digitalPinToInterrupt function not working...)
+  attachInterrupt(speedUp, faster, RISING);                        // set speedUp Interrupt
   attachInterrupt(changeDir, reverse, RISING);                     // set change Direction Interrupt
   
-  pinMode(chA,INPUT);                                              // set ChA to Input
   attachInterrupt(chA, incrA, RISING);                             // set ChannelA Interrupt
-  
-  pinMode(chB,INPUT);                                              // set ChB to Input
   attachInterrupt(chB, incrB, RISING);                             // set ChannelB Interrupt
 
-  analogWrite(saberT,zeroSpeed);                                //Set to 2.5V (Middle Value, no motor motion) 
-  while (digitalRead(startPin)==0){                       //User must press startPin to begin
-  }
+
 }
 
 
