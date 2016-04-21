@@ -19,9 +19,9 @@ volatile int Dir = 1;               // Direction of Arm (1-extend, 0-flex). Arm 
 int maxCount = 194;                 // Max allowable channelA/B count before reversing direction. 
                                     // For 140 degrees of motion (set to 201 for 145 degrees)
 
-int ms = 50;                        // Set Delay Time (in milliseconds)
-int MAXVALUE = 241;                 // Max speed value in extension (241 is 3.125V)
-int MINVALUE = 145;                 // Max speed value in flexion (145 is 1.875V)
+int ms = 500;                       // Set Delay Time (in milliseconds)
+int MAXVALUE = 243;                 // Max speed value in extension (245-> 3.125V with filter)
+int MINVALUE = 146 ;                 // Max speed value in flexion (148-> 1.875V with filter)
 
 // FUNCTIONS -----------------------------------------
 
@@ -77,36 +77,40 @@ void slower(){
   if (currSpeed > zeroSpeed){
     analogWrite(saberT, currSpeed-1);
     currSpeed = currSpeed - 1;
+    delay(ms);
   }
   if (currSpeed < zeroSpeed){
     analogWrite(saberT, currSpeed+1);    
-    currSpeed = currSpeed + 1;
+    currSpeed++;
+    delay(ms);
   }
 }
-
 
 void faster(){
   if (currSpeed >= zeroSpeed && currSpeed < MAXVALUE){
     analogWrite(saberT, currSpeed+1);
-    currSpeed = currSpeed + 1;
+    currSpeed++;
+    delay(ms);
   }
   if(currSpeed < zeroSpeed && currSpeed > MINVALUE){
     analogWrite(saberT, currSpeed-1);
     currSpeed = currSpeed - 1;
+    delay(ms);
   }
 }
-
 
 void reverse(){
   if (Dir){
     Dir = 0;
   analogWrite(saberT,(2*zeroSpeed)-currSpeed);
-  currSpeed = 2*zeroSpeed-currSpeed;
+  currSpeed = 2*zeroSpeed - currSpeed;
+  delay(ms);
   }
   else {
     Dir = 1;
   analogWrite(saberT,(2*zeroSpeed)-currSpeed);
-  currSpeed = 2*zeroSpeed-currSpeed;
+  currSpeed = 2*zeroSpeed - currSpeed;
+  delay(ms);
   }
 }
 
@@ -133,8 +137,6 @@ void setup() {
   
   attachInterrupt(chA, incrA, RISING);                             // set ChannelA Interrupt
   attachInterrupt(chB, incrB, RISING);                             // set ChannelB Interrupt
-
-
 }
 
 
