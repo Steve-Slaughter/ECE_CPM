@@ -13,7 +13,7 @@ int chB = 12;           // Encoder Channel B Connected to Pin 12
 //Variables
 volatile int aCount = 0;        // Record #of ChA pulses
 volatile int bCount = 0;        // Record #of ChB pulses
-volatile int speedDif = 0;      // Absolute Value of current output setting minus 193(zero-motion)
+volatile int currSpeed = 193;      // record of current PWM output
 volatile int Dir = 1;           // Direction of Arm (1-extend, 0-flex). Arm extends at start
 int maxCount = 194;           // Max allowable channelA/B count before reversing direction. 
                               // For 140 degrees of motion (set to 201 for 145 degrees)
@@ -32,13 +32,15 @@ void eStop() {
 void incrA(){
   if(aCount==maxCount){
     //Change Direction to Backward
-    analogWrite(saberT,(2*193)-analogRead(saberT));
+    analogWrite(saberT,(2*193)-currSpeed);
     Dir = 0;
+    currSpeed = 2*193-currSpeed;
   }
   if(aCount==0){
     //Change Direction to Forward
-    analogWrite(saberT,(2*193)-analogRead(saberT));
+    analogWrite(saberT,(2*193)-currSpeed);
     Dir = 1;
+    currSpeed = 2*193-currSpeed;
   }
   if(Dir == 1){
     aCount++;
@@ -51,13 +53,15 @@ void incrA(){
 void incrB() {
   if(bCount==maxCount){
     //Change Direction to Backward
-    analogWrite(saberT,(2*193)-analogRead(saberT));
+    analogWrite(saberT,(2*193)-currSpeed);
     Dir = 0;
+    currSpeed = 2*193-currSpeed;
   }
   if(bCount==0){
     //Change Direction to Forward
-    analogWrite(saberT,(2*193)-analogRead(saberT));
+    analogWrite(saberT,(2*193)-currSpeed);
     Dir = 1;
+    currSpeed = 2*193-currSpeed;
   }
   if(Dir == 1){
     bCount++;
@@ -69,20 +73,24 @@ void incrB() {
 
 void slower(){
   if (analogRead(saberT)>193){
-    analogWrite(saberT, analogRead(saberT)-1);
+    analogWrite(saberT, currSpeed-1);
+    currSpeed = currSpeed - 1;
   }
   if (analogRead(saberT)<193){
-    analogWrite(saberT, analogRead(saberT)+1);    
+    analogWrite(saberT, currSpeed+1);    
+    currSpeed = currSpeed + 1;
   }
 }
 
 
 void faster(){
   if (analogRead(saberT)>=193 && analogRead(saberT)<MAXVALUE){
-    analogWrite(saberT, analogRead(saberT)+1);
+    analogWrite(saberT, acurrSpeed+1);
+    currSpeed = currSpeed + 1;
   }
   if(analogRead(saberT)<193 && analogRead(saberT)>MINVALUE){
-    analogWrite(saberT, analogRead(saberT)-1);
+    analogWrite(saberT, currSpeed-1);
+    currSpeed = currSpeed - 1;
   }
 }
 
@@ -90,11 +98,13 @@ void faster(){
 void reverse(){
   if (Dir){
     Dir = 0;
-  analogWrite(saberT,(2*193)-analogRead(saberT));
+  analogWrite(saberT,(2*193)-currSpeed);
+  currSpeed = 2*193-currSpeed;
   }
   else {
     Dir = 1;
-  analogWrite(saberT,(2*193)-analogRead(saberT));
+  analogWrite(saberT,(2*193)-currSpeed);
+  currSpeed = 2*193-currSpeed;
   }
 }
 
@@ -102,32 +112,32 @@ void reverse(){
 
 void setup() { 
     
-  pinMode(startPin,INPUT_PULLUP);                                         // set startPin to Input
+  pinMode(startPin,INPUT_PULLUP);                                  // set startPin to Input
   
   pinMode(eStopPin,INPUT_PULLUP);                                  // set eStopPin to Input
-  attachInterrupt(eStopPin, eStop, HIGH);   // set EStop Interrupt
+  attachInterrupt(eStopPin, eStop, HIGH);                          // set EStop Interrupt
   
   pinMode(slowDown,INPUT_PULLUP);                                  // set slowDown to Input
-  attachInterrupt(slowDown, slower, RISING);  // set slowDown Interrupt (digitalPinToInterrupt function not working...)
+  attachInterrupt(slowDown, slower, RISING);                       // set slowDown Interrupt (digitalPinToInterrupt function not working...)
   
   pinMode(speedUp,INPUT_PULLUP);                                   // set speedUp to Input
-  attachInterrupt(speedUp, faster, RISING);   // set speedUp Interrupt
+  attachInterrupt(speedUp, faster, RISING);                        // set speedUp Interrupt
   
   pinMode(saberT,OUTPUT);                                          // Output to Sabertooth
 
   pinMode(changeDir,INPUT);                                        // set changeDir to Input
-  attachInterrupt(changeDir, reverse, RISING); // set change Direction Interrupt
+  attachInterrupt(changeDir, reverse, RISING);                     // set change Direction Interrupt
   
   pinMode(chA,INPUT);                                              // set ChA to Input
-  attachInterrupt(chA, incrA, RISING);      // set ChannelA Interrupt
+  attachInterrupt(chA, incrA, RISING);                             // set ChannelA Interrupt
   
   pinMode(chB,INPUT);                                              // set ChB to Input
-  attachInterrupt(chB, incrB, RISING);      // set ChannelB Interrupt
+  attachInterrupt(chB, incrB, RISING);                             // set ChannelB Interrupt
 
 
-  while (digitalRead(startPin)==0){         //User must press startPin to begin
+  while (digitalRead(startPin)==0){                       //User must press startPin to begin
   }
-  analogWrite(saberT,193);     //Set to 2.5V (Middle Value, no motor motion) 
+  analogWrite(saberT,193);                                //Set to 2.5V (Middle Value, no motor motion) 
 }
 
 
