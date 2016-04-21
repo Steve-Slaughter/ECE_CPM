@@ -17,14 +17,15 @@ volatile int currSpeed = 193;      // record of current PWM output
 volatile int Dir = 1;           // Direction of Arm (1-extend, 0-flex). Arm extends at start
 int maxCount = 194;           // Max allowable channelA/B count before reversing direction. 
                               // For 140 degrees of motion (set to 201 for 145 degrees)
+int zeroSpeed = 194;
 int ms = 50;                 // Set Delay Time (in milliseconds)
-unsigned int MAXVALUE = 203;            // Max speed value in extension (241 is 3.125V)
-unsigned int MINVALUE = 183;            // Max speed value in flexion (145 is 1.875V)
+int MAXVALUE = 203;            // Max speed value in extension (241 is 3.125V)
+int MINVALUE = 183;            // Max speed value in flexion (145 is 1.875V)
 
 // FUNCTIONS -----------------------------------------
 
 void eStop() {                  
-  analogWrite(saberT,193);
+  analogWrite(saberT,195);
   while(1){
   }
 }
@@ -72,11 +73,11 @@ void incrB() {
 }
 
 void slower(){
-  if (analogRead(saberT)>193){
+  if (currSpeed > zeroSpeed){
     analogWrite(saberT, currSpeed-1);
     currSpeed = currSpeed - 1;
   }
-  if (analogRead(saberT)<193){
+  if (currSpeed < zeroSpeed){
     analogWrite(saberT, currSpeed+1);    
     currSpeed = currSpeed + 1;
   }
@@ -84,11 +85,11 @@ void slower(){
 
 
 void faster(){
-  if (analogRead(saberT)>=193 && analogRead(saberT)<MAXVALUE){
-    analogWrite(saberT, acurrSpeed+1);
+  if (currSpeed >= zeroSpeed && currSpeed < MAXVALUE){
+    analogWrite(saberT, currSpeed+1);
     currSpeed = currSpeed + 1;
   }
-  if(analogRead(saberT)<193 && analogRead(saberT)>MINVALUE){
+  if(currSpeed < zeroSpeed && currSpeed > MINVALUE){
     analogWrite(saberT, currSpeed-1);
     currSpeed = currSpeed - 1;
   }
@@ -111,6 +112,7 @@ void reverse(){
 //-----------------------------------------
 
 void setup() { 
+  analogWrite(saberT,zeroSpeed);                                //Set to 2.5V (Middle Value, no motor motion) 
     
   pinMode(startPin,INPUT_PULLUP);                                  // set startPin to Input
   
@@ -137,7 +139,6 @@ void setup() {
 
   while (digitalRead(startPin)==0){                       //User must press startPin to begin
   }
-  analogWrite(saberT,193);                                //Set to 2.5V (Middle Value, no motor motion) 
 }
 
 
