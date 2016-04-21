@@ -11,21 +11,22 @@ int chA = 11;           // Encoder Channel A Connected to Pin 11
 int chB = 12;           // Encoder Channel B Connected to Pin 12
 
 //Variables
-volatile int aCount = 0;        // Record #of ChA pulses
-volatile int bCount = 0;        // Record #of ChB pulses
-volatile int currSpeed = 193;      // record of current PWM output
-volatile int Dir = 1;           // Direction of Arm (1-extend, 0-flex). Arm extends at start
-int maxCount = 194;           // Max allowable channelA/B count before reversing direction. 
-                              // For 140 degrees of motion (set to 201 for 145 degrees)
-int zeroSpeed = 194;
-int ms = 50;                 // Set Delay Time (in milliseconds)
-int MAXVALUE = 203;            // Max speed value in extension (241 is 3.125V)
-int MINVALUE = 183;            // Max speed value in flexion (145 is 1.875V)
+int zeroSpeed = 194;                // PWM value for no motion
+volatile int aCount = 0;            // Record #of ChA pulses
+volatile int bCount = 0;            // Record #of ChB pulses
+volatile int currSpeed = zeroSpeed;      // record of current PWM output
+volatile int Dir = 1;               // Direction of Arm (1-extend, 0-flex). Arm extends at start
+int maxCount = 194;                 // Max allowable channelA/B count before reversing direction. 
+                                    // For 140 degrees of motion (set to 201 for 145 degrees)
+
+int ms = 50;                        // Set Delay Time (in milliseconds)
+int MAXVALUE = 241;                 // Max speed value in extension (241 is 3.125V)
+int MINVALUE = 145;                 // Max speed value in flexion (145 is 1.875V)
 
 // FUNCTIONS -----------------------------------------
 
 void eStop() {                  
-  analogWrite(saberT,195);
+  analogWrite(saberT,zeroSpeed);
   while(1){
   }
 }
@@ -33,15 +34,15 @@ void eStop() {
 void incrA(){
   if(aCount==maxCount){
     //Change Direction to Backward
-    analogWrite(saberT,(2*193)-currSpeed);
+    analogWrite(saberT,(2*zeroSpeed)-currSpeed);
     Dir = 0;
-    currSpeed = 2*193-currSpeed;
+    currSpeed = 2*zeroSpeed-currSpeed;
   }
   if(aCount==0){
     //Change Direction to Forward
-    analogWrite(saberT,(2*193)-currSpeed);
+    analogWrite(saberT,(2*zeroSpeed)-currSpeed);
     Dir = 1;
-    currSpeed = 2*193-currSpeed;
+    currSpeed = 2*zeroSpeed-currSpeed;
   }
   if(Dir == 1){
     aCount++;
@@ -54,15 +55,15 @@ void incrA(){
 void incrB() {
   if(bCount==maxCount){
     //Change Direction to Backward
-    analogWrite(saberT,(2*193)-currSpeed);
+    analogWrite(saberT,(2*zeroSpeed)-currSpeed);
     Dir = 0;
-    currSpeed = 2*193-currSpeed;
+    currSpeed = 2*zeroSpeed-currSpeed;
   }
   if(bCount==0){
     //Change Direction to Forward
-    analogWrite(saberT,(2*193)-currSpeed);
+    analogWrite(saberT,(2*zeroSpeed)-currSpeed);
     Dir = 1;
-    currSpeed = 2*193-currSpeed;
+    currSpeed = 2*zeroSpeed-currSpeed;
   }
   if(Dir == 1){
     bCount++;
@@ -99,21 +100,19 @@ void faster(){
 void reverse(){
   if (Dir){
     Dir = 0;
-  analogWrite(saberT,(2*193)-currSpeed);
-  currSpeed = 2*193-currSpeed;
+  analogWrite(saberT,(2*zeroSpeed)-currSpeed);
+  currSpeed = 2*zeroSpeed-currSpeed;
   }
   else {
     Dir = 1;
-  analogWrite(saberT,(2*193)-currSpeed);
-  currSpeed = 2*193-currSpeed;
+  analogWrite(saberT,(2*zeroSpeed)-currSpeed);
+  currSpeed = 2*zeroSpeed-currSpeed;
   }
 }
 
 //-----------------------------------------
 
-void setup() { 
-  analogWrite(saberT,zeroSpeed);                                //Set to 2.5V (Middle Value, no motor motion) 
-    
+void setup() {     
   pinMode(startPin,INPUT_PULLUP);                                  // set startPin to Input
   
   pinMode(eStopPin,INPUT_PULLUP);                                  // set eStopPin to Input
@@ -136,7 +135,7 @@ void setup() {
   pinMode(chB,INPUT);                                              // set ChB to Input
   attachInterrupt(chB, incrB, RISING);                             // set ChannelB Interrupt
 
-
+  analogWrite(saberT,zeroSpeed);                                //Set to 2.5V (Middle Value, no motor motion) 
   while (digitalRead(startPin)==0){                       //User must press startPin to begin
   }
 }
